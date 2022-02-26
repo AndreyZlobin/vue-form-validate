@@ -1,5 +1,5 @@
 import { Rule } from "~/core/validator";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 
 const otions = {};
 
@@ -20,11 +20,20 @@ export function useForm<T extends string>(fields: Fields<T>) {
 
   const resetError = {} as ErrorStack;
   const values = ref(fields);
-  const $valid = ref<boolean>(true);
-  const $error = ref<boolean>(false);
-  const errors = ref<ErrorStack>({ ...resetError });
-
-  function _validate(): void {
+  const $valid = ref(true);
+  const $error = ref(false);
+  const $dirty = ref(false);
+  const errors = ref({ ...resetError });
+  const data = computed(() =>
+    Object.fromEntries(
+      (Object.keys(values.value) as Array<keyof typeof values.value>).map((it) => [
+        [it],
+        values.value[it].value,
+      ]),
+    ),
+  );
+  const _validate = () => {
+    $dirty.value = true;
     for (const key in fields) {
       const field = fields[key];
       for (const rule of field.rules) {
@@ -38,11 +47,12 @@ export function useForm<T extends string>(fields: Fields<T>) {
         }
       }
     }
-
     const errorLength = Object.keys(errors.value).length;
     $error.value = Boolean(errorLength);
     $valid.value = !errorLength;
-  }
+    console.log(errors.value);
+    return $valid.value;
+  };
 
   function reset() {
     for (const key in values.value) {
@@ -50,14 +60,20 @@ export function useForm<T extends string>(fields: Fields<T>) {
     }
   }
 
-  const submitHandler = () => {
+  const onSubmit = (handler: (data: any) => void) => {
+    console.log("we");
     _validate();
+    handler(data.value);
   };
 
   return {
-    submitHandler,
+    onSubmit,
     reset,
     values,
     errors,
+    $valid,
+    $dirty,
+    $error,
+    data,
   };
 }

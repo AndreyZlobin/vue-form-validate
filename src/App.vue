@@ -1,10 +1,12 @@
 <template>
-  <VForm @on-submit="submitHandler">
-    <FormInput v-model="values.name.value" :rules="rulesForField" />
+  <form @submit.prevent="submitHandler">
+    <FormInput v-model="values.name.value" />
     <button type="submit">submit</button>
     {{ value }}
-  </VForm>
+  </form>
   <button @click="reset">reset</button>
+  <pre>{{ JSON.stringify(errors, 2, null) }}</pre>
+  <pre>{{ JSON.stringify(data, 2, null) }}</pre>
 </template>
 
 <script setup lang="ts">
@@ -16,17 +18,7 @@ import { useForm } from "~/core/form-lib/useForm";
 
 const value = ref("");
 
-const ru = {
-  name: {
-    value: "",
-    rules: [
-      { rule: required, errorMessage: "Обязательное поле" },
-      { rule: email, errorMessage: "Некорректный email" },
-    ],
-  },
-};
-
-const { values, submitHandler, reset } = useForm({
+const { values, onSubmit, reset, errors, data, $error, $valid, $dirty } = useForm({
   name: {
     value: "",
     rules: [
@@ -43,14 +35,7 @@ const { values, submitHandler, reset } = useForm({
   },
 });
 
-const rulesForField = [
-  { rule: required, errorMessage: "Обязательное поле" },
-  { rule: email, errorMessage: "Некорректный email" },
-];
-
-const submitForm = () => {
-  console.log("submitted");
-};
+const submitHandler = () => onSubmit((data) => console.log(data));
 </script>
 
 <style>

@@ -28,12 +28,12 @@ export default defineComponent({
   setup(props, ctx) {
     const { validate, state } = useFormProvide();
     const submitCallBack = () => {
-      if (validate()) {
-        ctx.emit("on-submit");
-      }
+      ctx.emit("on-submit");
     };
 
-    const onSubmit = submitCallBack;
+    const onSubmit = () => {
+      ctx.emit("on-submit");
+    };
 
     return {
       state,
